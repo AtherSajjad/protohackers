@@ -1,0 +1,67 @@
+package meanstoend;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import dto.Message;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.util.AttributeKey;
+
+@Sharable
+public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
+
+	private static final AttributeKey<ArrayList<Message>> sessionKey = AttributeKey.newInstance("session");
+
+	@Override
+	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
+		Message request = (Message) msg;
+
+		if (request.getOp() == 'I') {
+			ArrayList<Message> stored = ctx.channel().attr(sessionKey).get();
+			if (stored == null) {
+				ArrayList<Message> newEntries = new ArrayList<Message>();
+				newEntries.add(request);
+				ctx.channel().attr(sessionKey).set(newEntries);
+			} else {
+				boolean alreadyAvailableTimestamp = stored.stream()
+						.anyMatch(message -> message.getArg1() == request.getArg1());
+				if (!alreadyAvailableTimestamp) {
+					stored.add(request);
+					ctx.channel().attr(sessionKey).set(stored);
+				}
+			}
+
+		} else if (request.getOp() == 'Q') {
+			ArrayList<Message> data = ctx.channel().attr(sessionKey).get();
+
+			if (data == null) {
+				ByteBuf response = ctx.alloc().buffer(4);
+				response.writeInt(0);
+				ctx.writeAndFlush(response);
+				return;
+			}
+			long count = data.stream().filter(
+					(message) -> message.getArg1() >= request.getArg1() && message.getArg1() <= request.getArg2())
+					.count();
+
+			if (count == 0) {
+				ByteBuf response = ctx.alloc().buffer(4);
+				response.writeInt(0);
+				ctx.writeAndFlush(response);
+				return;
+			}
+
+			Integer sum = data.stream().filter(
+					(message) -> message.getArg1() >= request.getArg1() && message.getArg1() <= request.getArg2())
+					.map(Message::getArg2).collect(Collectors.summingInt(Integer::intValue));
+
+			ByteBuf response = ctx.alloc().buffer(4);
+			response.writeInt((int) (sum / count));
+			ctx.writeAndFlush(response);
+		}
+	}
+}
