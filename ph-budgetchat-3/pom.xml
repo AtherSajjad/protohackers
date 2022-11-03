@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.protocols</groupId>
-	<artifactId>meanstoend</artifactId>
+	<artifactId>budgetchat</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>MeansToEnd</name>
+	<name>Budget Chat</name>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -18,13 +18,13 @@
 			<artifactId>netty-all</artifactId>
 			<version>4.1.84.Final</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.2.6</version>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>
@@ -40,11 +40,11 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<finalName>meanstoend</finalName>
+							<finalName>budgetchat</finalName>
 							<archive>
 								<manifest>
 									<mainClass>
-										meanstoend.Server
+										budgetchat.Server
 									</mainClass>
 								</manifest>
 							</archive>
@@ -57,4 +57,5 @@
 			</plugin>
 		</plugins>
 	</build>
+
 </project>
