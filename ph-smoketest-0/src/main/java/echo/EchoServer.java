@@ -1,4 +1,7 @@
-package prime;
+package echo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -9,15 +12,16 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 
-public class PrimeServer {
+public class EchoServer {
+
 	public static final int PORT = 4000;
 
+	private static Logger logger = LoggerFactory.getLogger(EchoServer.class);
+
 	public static void main(String[] args) {
+
+		logger.info("Starting Echo Server at port " + PORT);
 
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -29,10 +33,7 @@ public class PrimeServer {
 						@Override
 						protected void initChannel(SocketChannel ch) throws Exception {
 							ChannelPipeline pipeline = ch.pipeline();
-							pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-							pipeline.addLast(new StringDecoder());
-							pipeline.addLast(new StringEncoder());
-							pipeline.addLast(new PrimeServerHandler());
+							pipeline.addLast(new EchoServerHandler());
 						}
 					});
 
@@ -40,8 +41,9 @@ public class PrimeServer {
 
 			channelFuture.channel().closeFuture().sync();
 		} catch (Exception e) {
-			System.out.println("Argh!!!. Server Exception");
+			logger.error("Argh!!!. Server Exception");
 		} finally {
+			logger.error("Shutdown server");
 			bossGroup.shutdownGracefully();
 			workerGroup.shutdownGracefully();
 		}

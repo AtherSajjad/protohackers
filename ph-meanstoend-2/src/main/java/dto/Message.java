@@ -36,4 +36,9 @@ public class Message {
 		this.arg2 = arg2;
 	}
 
+	@Override
+	public String toString() {
+		return "Message [op=" + op + ", arg1=" + arg1 + ", arg2=" + arg2 + "]";
+	}
+
 }

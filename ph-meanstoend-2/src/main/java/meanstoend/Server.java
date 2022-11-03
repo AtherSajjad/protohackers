@@ -1,5 +1,8 @@
 package meanstoend;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,6 +15,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class Server {
 	public static final int PORT = 4000;
+	private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	public static void main(String[] args) {
 
@@ -31,6 +35,7 @@ public class Server {
 					});
 
 			ChannelFuture channelFuture = bootstrap.bind(PORT).sync();
+			logger.info("Means to end server Started at port " + PORT);
 
 			channelFuture.channel().closeFuture().sync();
 		} catch (Exception e) {

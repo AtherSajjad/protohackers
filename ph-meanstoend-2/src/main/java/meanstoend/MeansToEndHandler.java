@@ -3,6 +3,9 @@ package meanstoend;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dto.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,6 +17,7 @@ import io.netty.util.AttributeKey;
 public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 
 	private static final AttributeKey<ArrayList<Message>> sessionKey = AttributeKey.newInstance("session");
+	private static final Logger logger = LoggerFactory.getLogger(MeansToEndHandler.class);
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -35,10 +39,13 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 				}
 			}
 
+			logger.info("Rececived insert " + request);
+
 		} else if (request.getOp() == 'Q') {
 			ArrayList<Message> data = ctx.channel().attr(sessionKey).get();
 
 			if (data == null) {
+				logger.error("Received query, when no data is available so it returns 0");
 				ByteBuf response = ctx.alloc().buffer(4);
 				response.writeInt(0);
 				ctx.writeAndFlush(response);
@@ -49,6 +56,7 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 					.count();
 
 			if (count == 0) {
+				logger.error("Received query, there is no data in between the time range, so it returns 0" + request);
 				ByteBuf response = ctx.alloc().buffer(4);
 				response.writeInt(0);
 				ctx.writeAndFlush(response);
@@ -60,6 +68,7 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 					.map(Message::getArg2).collect(Collectors.summingInt(Integer::intValue));
 
 			ByteBuf response = ctx.alloc().buffer(4);
+			logger.info("Received query" + request + " and responding with answer " + ((int) (sum / count)));
 			response.writeInt((int) (sum / count));
 			ctx.writeAndFlush(response);
 		}
