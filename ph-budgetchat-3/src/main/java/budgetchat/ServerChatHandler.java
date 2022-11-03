@@ -12,6 +12,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import utils.Validator;
 
 public class ServerChatHandler extends SimpleChannelInboundHandler<String> {
 	private static final AttributeKey<String> NAMEKEY = AttributeKey.newInstance("name");
@@ -30,17 +31,21 @@ public class ServerChatHandler extends SimpleChannelInboundHandler<String> {
 	protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
 		String userName = ctx.channel().attr(NAMEKEY).get();
 
+		if (userName == null && !Validator.isValidUserName(msg)) {
+			logger.error("Invalid username");
+			ctx.writeAndFlush("Invalid username sent\n");
+			channels.remove(ctx.channel());
+			return;
+		}
+
 		// set first message as username
 		if (userName == null) {
 			ctx.channel().attr(NAMEKEY).set(msg);
+
 			logger.info(msg + " joined the room");
 
-			for (Channel channel : channels) {
-				if (channel != ctx.channel()) {
-					String userJoinedMessage = "* " + msg + " has entered the room\n";
-					channel.writeAndFlush(userJoinedMessage);
-				}
-			}
+			String userJoinedMessage = "* " + msg + " has entered the room\n";
+			broadCast(ctx.channel(), userJoinedMessage);
 
 			String message = "* The room contains: ";
 
@@ -55,9 +60,13 @@ public class ServerChatHandler extends SimpleChannelInboundHandler<String> {
 
 		logger.info(userName + " sent " + msg + ", relaying to others");
 		// Relay to others with username
+		String message = "[" + userName + "] " + msg + "\n";
+		broadCast(ctx.channel(), message);
+	}
+
+	public void broadCast(Channel except, String message) {
 		for (Channel channel : channels) {
-			if (channel != ctx.channel()) {
-				String message = "[" + userName + "] " + msg + "\n";
+			if (channel != except) {
 				channel.writeAndFlush(message);
 			}
 		}
@@ -71,13 +80,8 @@ public class ServerChatHandler extends SimpleChannelInboundHandler<String> {
 		}
 		String userLeftMessage = "* " + userName + " has left the room\n";
 		logger.info(userName + " has left the room");
+		broadCast(ctx.channel(), userLeftMessage);
 		channels.remove(ctx.channel());
-		for (Channel channel : channels) {
-			if (channel != ctx.channel()) {
-				channel.writeAndFlush(userLeftMessage);
-			}
-		}
-
 	}
 
 	@Override
