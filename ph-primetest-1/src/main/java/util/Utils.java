@@ -12,15 +12,16 @@ public class Utils {
 			return false;
 		}
 	}
-	
+
 	public static boolean isANumber(JSONObject request) {
 		try {
-			request.getNumber("number");
-			return true;
+			if (request.get("number") instanceof Number) {
+				return true;
+			}
 		} catch (Exception e) {
-			return false;
-
 		}
+
+		return false;
 	}
 
 }
