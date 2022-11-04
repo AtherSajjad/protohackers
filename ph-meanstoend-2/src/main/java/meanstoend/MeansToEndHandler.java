@@ -73,4 +73,10 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 			ctx.writeAndFlush(response);
 		}
 	}
+	
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		logger.error(cause.getLocalizedMessage());
+		cause.printStackTrace();
+	}
 }
