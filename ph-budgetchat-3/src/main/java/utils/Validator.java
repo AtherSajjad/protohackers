@@ -5,11 +5,7 @@ public class Validator {
 		if (userName.trim().isEmpty()) {
 			return false;
 		}
-		for (char ch : userName.toCharArray()) {
-			if (!Character.isAlphabetic(ch)) {
-				return false;
-			}
-		}
-		return true;
+
+		return userName.matches("^[A-Za-z0-9]*$");
 	}
 }

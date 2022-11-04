@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
@@ -32,14 +34,13 @@ public class ServerChatHandler extends SimpleChannelInboundHandler<String> {
 		String userName = ctx.channel().attr(NAMEKEY).get();
 
 		if (userName == null && !Validator.isValidUserName(msg)) {
-			logger.info("Username ="+msg);
-			if (!Validator.isValidUserName(msg)) {
-				logger.error("Invalid username");
-				ctx.writeAndFlush("Invalid username sent\n");
-				channels.remove(ctx.channel());
-				return;
+			logger.info("Username =" + msg);
+			logger.error("Invalid username");
+			ChannelFuture future = ctx.writeAndFlush("Invalid username sent\n");
+			future.addListener(ChannelFutureListener.CLOSE);
+			channels.remove(ctx.channel());
+			return;
 
-			}
 		}
 
 		// set first message as username
