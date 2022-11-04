@@ -71,7 +71,7 @@ public class ServerChatHandler extends SimpleChannelInboundHandler<String> {
 
 	public void broadCast(Channel except, String message) {
 		for (Channel channel : channels) {
-			if (channel != except) {
+			if (channel != except && channel.attr(NAMEKEY) != null) {
 				channel.writeAndFlush(message);
 			}
 		}
