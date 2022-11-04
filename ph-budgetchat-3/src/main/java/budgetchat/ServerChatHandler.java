@@ -32,10 +32,14 @@ public class ServerChatHandler extends SimpleChannelInboundHandler<String> {
 		String userName = ctx.channel().attr(NAMEKEY).get();
 
 		if (userName == null && !Validator.isValidUserName(msg)) {
-			logger.error("Invalid username");
-			ctx.writeAndFlush("Invalid username sent\n");
-			channels.remove(ctx.channel());
-			return;
+			logger.info("Username ="+msg);
+			if (!Validator.isValidUserName(msg)) {
+				logger.error("Invalid username");
+				ctx.writeAndFlush("Invalid username sent\n");
+				channels.remove(ctx.channel());
+				return;
+
+			}
 		}
 
 		// set first message as username
