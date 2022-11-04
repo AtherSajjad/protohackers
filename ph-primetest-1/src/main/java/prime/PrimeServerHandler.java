@@ -20,6 +20,7 @@ public class PrimeServerHandler extends SimpleChannelInboundHandler<String> {
 			logger.error("Received malformed input " + msg);
 			ChannelFuture future = ctx.writeAndFlush("Malformed Response, Not a valid json\n");
 			future.addListener(ChannelFutureListener.CLOSE);
+			return;
 		}
 
 		JSONObject request = new JSONObject(msg);
@@ -28,6 +29,7 @@ public class PrimeServerHandler extends SimpleChannelInboundHandler<String> {
 
 			ChannelFuture future = ctx.writeAndFlush("Malformed Response, Invalid method name\n");
 			future.addListener(ChannelFutureListener.CLOSE);
+			return;
 		}
 
 		if (!request.has("number") || !Utils.isANumber(request)) {
@@ -35,6 +37,7 @@ public class PrimeServerHandler extends SimpleChannelInboundHandler<String> {
 
 			ChannelFuture future = ctx.writeAndFlush("Malformed Response, Not a number\n");
 			future.addListener(ChannelFutureListener.CLOSE);
+			return;
 		}
 
 		Number number = request.getNumber("number");
@@ -46,7 +49,7 @@ public class PrimeServerHandler extends SimpleChannelInboundHandler<String> {
 
 		ctx.writeAndFlush(response.toString() + "\n");
 	}
-	
+
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error(cause.getLocalizedMessage());
