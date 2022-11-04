@@ -49,7 +49,8 @@ public class PrimeServerHandler extends SimpleChannelInboundHandler<String> {
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		
+		logger.error(cause.getLocalizedMessage());
+		cause.printStackTrace();
 	}
 
 }
