@@ -30,6 +30,7 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 		if (message.trim().isEmpty()) {
 			return;
 		}
+		logger.info("Received="+message);
 		if (message.equals("version")) {
 			String versionResponse = "version=Ken's Key-Value Store 1.0";
 			sendResponse(versionResponse, packet, ctx);
