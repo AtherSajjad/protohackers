@@ -30,6 +30,7 @@ public class Server {
 
 			channelFuture.channel().closeFuture().sync();
 		} catch (Exception e) {
+			System.out.println(e);
 			logger.error("Argh!!!. Server Exception");
 		} finally {
 			logger.error("Shutdown server");
