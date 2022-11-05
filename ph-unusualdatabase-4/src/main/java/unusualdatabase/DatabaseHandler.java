@@ -29,16 +29,17 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 		String message = packet.content().toString(CharsetUtil.UTF_8);
 		message = message.replace("\n", "");
 		message = message.replace("\r", "");
-		
-		logger.info("Received " + message);
+
 		if (message.equals("version")) {
 			String versionResponse = "version=Ken's Key-Value Store 1.0";
 			sendResponse(versionResponse, packet, ctx);
 			return;
 		}
 
-		System.out.println(message.length());
+		// System.out.println(message.length());
 		if (message.contains("=") && message.length() > 1) {
+			logger.info("Insert " + message);
+
 			// its an insert
 			String key = message.substring(0, message.indexOf("="));
 			if (key.equals("version")) {
@@ -46,11 +47,12 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 				return;
 			}
 			String value = message.substring(message.indexOf("=") + 1);
-			System.out.println(key + " = " + value);
+			// System.out.println(key + " = " + value);
 
 			dataStore.put(key, value);
 		} else {
 			// its a retrieve request
+			logger.info("Retrieve " + message);
 			String value = dataStore.get(message);
 			sendResponse(message + "=" + (value == null ? "" : value), packet, ctx);
 		}
