@@ -50,7 +50,7 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 		} else {
 			// its a retrieve request
 			String value = dataStore.get(message);
-			sendResponse(message + "=" + value == null ? "" : value, packet, ctx);
+			sendResponse(message + "=" + (value == null ? "" : value), packet, ctx);
 		}
 	}
 
