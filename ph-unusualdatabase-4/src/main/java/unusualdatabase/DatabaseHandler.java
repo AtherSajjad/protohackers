@@ -26,11 +26,11 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket packet) throws Exception {
-		String message = packet.content().toString(CharsetUtil.UTF_8).trim();
+		String message = packet.content().toString(CharsetUtil.UTF_8);
 		if (message.trim().isEmpty()) {
 			return;
 		}
-		logger.info("Received="+message);
+		logger.info("Received=" + message);
 		if (message.equals("version")) {
 			String versionResponse = "version=Ken's Key-Value Store 1.0";
 			sendResponse(versionResponse, packet, ctx);
@@ -39,12 +39,12 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 
 		if (message.contains("=")) {
 			// its an insert
-			String key = message.substring(0, message.indexOf("=")).trim();
+			String key = message.substring(0, message.indexOf("="));
 			if (key.equals("version")) {
 				// ignore overriding version
 				return;
 			}
-			String value = message.substring(message.indexOf("=") + 1).trim();
+			String value = message.substring(message.indexOf("=") + 1);
 			System.out.println(key + " = " + value);
 
 			dataStore.put(key, value);
