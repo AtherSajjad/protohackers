@@ -37,7 +37,7 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 			return;
 		}
 
-		if (message.contains("=")) {
+		if (message.contains("=") && message.length() > 1) {
 			// its an insert
 			String key = message.substring(0, message.indexOf("="));
 			if (key.equals("version")) {
