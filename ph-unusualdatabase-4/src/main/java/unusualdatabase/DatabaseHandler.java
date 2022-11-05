@@ -6,12 +6,15 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.CharsetUtil;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 @Sharable
 public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket> {
@@ -42,12 +45,12 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 
 			// its an insert
 			String key = message.substring(0, message.indexOf("="));
-			if (key.equals("version")) {
+			if (key.equals("version") || key.equals("=")) {
 				// ignore overriding version
 				return;
 			}
 			String value = message.substring(message.indexOf("=") + 1);
-			// System.out.println(key + " = " + value);
+			System.out.println(key + " = " + value);
 
 			dataStore.put(key, value);
 		} else {
@@ -59,9 +62,15 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 	}
 
 	void sendResponse(String message, DatagramPacket packet, ChannelHandlerContext ctx) {
-		ByteBuf response = ctx.alloc().buffer();
-		response.writeCharSequence(message, CharsetUtil.UTF_8);
-		ctx.writeAndFlush(new DatagramPacket(response, packet.sender()));
+		ChannelFuture future = ctx
+				.writeAndFlush(new DatagramPacket(Unpooled.copiedBuffer(message, CharsetUtil.UTF_8), packet.sender()));
+		
+		future.addListener(new GenericFutureListener<Future<? super Void>>() {
+			@Override
+			public void operationComplete(Future<? super Void> future) throws Exception {
+				logger.info("Sent message to server");
+			}
+		});
 	}
 
 }

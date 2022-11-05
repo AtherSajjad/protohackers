@@ -24,6 +24,7 @@ public class Server {
 		try {
 			Bootstrap bootstrap = new Bootstrap();
 			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
+					.option(ChannelOption.SO_RCVBUF, 1000).option(ChannelOption.SO_SNDBUF, 1000)
 					.handler(new DatabaseHandler());
 
 			ChannelFuture channelFuture = bootstrap.bind(PORT).sync();
