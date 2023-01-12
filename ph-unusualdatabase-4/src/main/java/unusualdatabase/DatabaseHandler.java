@@ -52,7 +52,7 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 			String value = message.substring(message.indexOf("=") + 1);
 			System.out.println(key + " = " + value);
 
-			dataStore.put(key, value);
+			dataStore.put(key.trim(), value.trim());
 		} else {
 			// its a retrieve request
 			logger.info("Retrieve " + message);
