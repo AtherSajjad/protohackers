@@ -2,6 +2,7 @@ package unusualdatabase;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
 	private static Logger logger = LoggerFactory.getLogger(DatabaseHandler.class);
-	private static Map<String, String> dataStore = new HashMap<>();
+	private static ConcurrentHashMap<String, String> dataStore = new ConcurrentHashMap<>();
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
