@@ -51,17 +51,12 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 				return;
 			}
 			String value = message.substring(message.indexOf("=") + 1);
-			System.out.println(key + " = " + value);
 
-			dataStore.put(key.trim(), value.trim());
+			dataStore.put(key.trim(), value);
 		} else {
 			// its a retrieve request
-			logger.info("Retrieve " + message);
 			String value = dataStore.get(message);
-			if(message.trim().length() ==0) {
-				sendResponse("", packet, ctx);
-				return;
-			}
+			logger.info("Retrieve " + message + "=" + value == null ? "" : value);
 			sendResponse(message + "=" + (value == null ? "" : value), packet, ctx);
 		}
 	}
@@ -69,13 +64,7 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 	void sendResponse(String message, DatagramPacket packet, ChannelHandlerContext ctx) {
 		ChannelFuture future = ctx
 				.writeAndFlush(new DatagramPacket(Unpooled.copiedBuffer(message, CharsetUtil.UTF_8), packet.sender()));
-		
-		future.addListener(new GenericFutureListener<Future<? super Void>>() {
-			@Override
-			public void operationComplete(Future<? super Void> future) throws Exception {
-				logger.info("Sent message to server");
-			}
-		});
+
 	}
 
 }
