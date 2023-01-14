@@ -58,6 +58,10 @@ public class DatabaseHandler extends SimpleChannelInboundHandler<DatagramPacket>
 			// its a retrieve request
 			logger.info("Retrieve " + message);
 			String value = dataStore.get(message);
+			if(message.trim().length() ==0) {
+				sendResponse("", packet, ctx);
+				return;
+			}
 			sendResponse(message + "=" + (value == null ? "" : value), packet, ctx);
 		}
 	}
