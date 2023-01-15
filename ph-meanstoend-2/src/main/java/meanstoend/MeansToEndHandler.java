@@ -32,7 +32,7 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 			if (stored == null) {
 				stored = new HashMap<>();
 			}
-			
+
 			stored.put(request.getArg1(), request.getArg2());
 			ctx.channel().attr(sessionKey).set(stored);
 
@@ -47,7 +47,7 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 				return;
 			}
 
-			int sum = 0, count = 0, avg = 0;
+			long sum = 0, count = 0, avg = 0;
 			for (Map.Entry<Integer, Integer> entry : stored.entrySet()) {
 				int time = entry.getKey();
 				int value = entry.getValue();
@@ -63,8 +63,8 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 			}
 
 			ByteBuf response = ctx.alloc().buffer(4);
-			logger.info("Received query" + request + " and responding with answer " + avg);
-			response.writeInt(avg);
+			logger.info("Received query" + request + " and sum = " + sum + " avg= " + avg);
+			response.writeInt((int) avg);
 			ctx.writeAndFlush(response);
 		}
 	}
