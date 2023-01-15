@@ -32,12 +32,13 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 				newEntries.add(request);
 				ctx.channel().attr(sessionKey).set(newEntries);
 			} else {
-				boolean alreadyAvailableTimestamp = stored.stream()
-						.anyMatch(message -> message.getArg1() == request.getArg1());
-				if (!alreadyAvailableTimestamp) {
-					stored.add(request);
-					ctx.channel().attr(sessionKey).set(stored);
-				}
+				stored.add(request);
+				ctx.channel().attr(sessionKey).set(stored);
+//				boolean alreadyAvailableTimestamp = stored.stream()
+//						.anyMatch(message -> message.getArg1() == request.getArg1());
+//				if (!alreadyAvailableTimestamp) {
+//					
+//				}
 			}
 
 			logger.info("Rececived insert " + request);
