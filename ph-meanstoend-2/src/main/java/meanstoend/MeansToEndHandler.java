@@ -1,23 +1,22 @@
 package meanstoend;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dto.Message;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.util.AttributeKey;
 
 @Sharable
 public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 
-	private static final AttributeKey<ArrayList<Message>> sessionKey = AttributeKey.newInstance("session");
+	private static final AttributeKey<Map<Integer, Integer>> sessionKey = AttributeKey.newInstance("session");
 	private static final Logger logger = LoggerFactory.getLogger(MeansToEndHandler.class);
 
 	@Override
@@ -26,27 +25,21 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 		Message request = (Message) msg;
 
 		if (request.getOp() == 'I') {
-			ArrayList<Message> stored = ctx.channel().attr(sessionKey).get();
-			if (stored == null) {
-				ArrayList<Message> newEntries = new ArrayList<Message>();
-				newEntries.add(request);
-				ctx.channel().attr(sessionKey).set(newEntries);
-			} else {
-				stored.add(request);
-				ctx.channel().attr(sessionKey).set(stored);
-//				boolean alreadyAvailableTimestamp = stored.stream()
-//						.anyMatch(message -> message.getArg1() == request.getArg1());
-//				if (!alreadyAvailableTimestamp) {
-//					
-//				}
-			}
-
 			logger.info("Rececived insert " + request);
 
-		} else if (request.getOp() == 'Q') {
-			ArrayList<Message> data = ctx.channel().attr(sessionKey).get();
+			Map<Integer, Integer> stored = ctx.channel().attr(sessionKey).get();
 
-			if (data == null) {
+			if (stored == null) {
+				stored = new HashMap<>();
+				stored.put(request.getArg1(), request.getArg2());
+
+			}
+			ctx.channel().attr(sessionKey).set(stored);
+
+		} else if (request.getOp() == 'Q') {
+			Map<Integer, Integer> stored = ctx.channel().attr(sessionKey).get();
+
+			if (stored == null) {
 				logger.error("Received query, when no data is available so it returns 0");
 				ByteBuf response = ctx.alloc().buffer(4);
 				response.writeInt(0);
@@ -54,25 +47,24 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 				return;
 			}
 
-			List<Message> filtered = data.stream().filter(
-					(message) -> message.getArg1() >= request.getArg1() && message.getArg1() <= request.getArg2())
-					.collect(Collectors.toList());
+			int sum = 0, count = 0, avg = 0;
+			for (Map.Entry<Integer, Integer> entry : stored.entrySet()) {
+				int time = entry.getKey();
+				int value = entry.getValue();
 
-			long count = filtered.size();
-
-			if (count == 0) {
-				logger.error("Received query, there is no data in between the time range, so it returns 0" + request);
-				ByteBuf response = ctx.alloc().buffer(4);
-				response.writeInt(0);
-				ctx.writeAndFlush(response);
-				return;
+				if (time >= request.getArg1() && time <= request.getArg2()) {
+					sum += value;
+					count++;
+				}
 			}
 
-			Integer sum = filtered.stream().mapToInt((message) -> message.getArg2()).sum();
+			if (count != 0) {
+				avg = sum / count;
+			}
 
 			ByteBuf response = ctx.alloc().buffer(4);
-			logger.info("Received query" + request + " and responding with answer " + ((int) (sum / count)));
-			response.writeInt((int) (sum / count));
+			logger.info("Received query" + request + " and responding with answer " + avg);
+			response.writeInt(avg);
 			ctx.writeAndFlush(response);
 		}
 	}
