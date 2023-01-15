@@ -1,6 +1,7 @@
 package meanstoend;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -51,9 +52,12 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 				ctx.writeAndFlush(response);
 				return;
 			}
-			long count = data.stream().filter(
+
+			List<Message> filtered = data.stream().filter(
 					(message) -> message.getArg1() >= request.getArg1() && message.getArg1() <= request.getArg2())
-					.count();
+					.collect(Collectors.toList());
+
+			long count = filtered.size();
 
 			if (count == 0) {
 				logger.error("Received query, there is no data in between the time range, so it returns 0" + request);
@@ -63,9 +67,7 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 				return;
 			}
 
-			Integer sum = data.stream().filter(
-					(message) -> message.getArg1() >= request.getArg1() && message.getArg1() <= request.getArg2())
-					.map(Message::getArg2).collect(Collectors.summingInt(Integer::intValue));
+			Integer sum = filtered.stream().mapToInt((message) -> message.getArg2()).sum();
 
 			ByteBuf response = ctx.alloc().buffer(4);
 			logger.info("Received query" + request + " and responding with answer " + ((int) (sum / count)));
@@ -73,7 +75,7 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 			ctx.writeAndFlush(response);
 		}
 	}
-	
+
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error(cause.getLocalizedMessage());
