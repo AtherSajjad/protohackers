@@ -31,9 +31,9 @@ public class MeansToEndHandler extends ChannelInboundHandlerAdapter {
 
 			if (stored == null) {
 				stored = new HashMap<>();
-				stored.put(request.getArg1(), request.getArg2());
-
 			}
+			
+			stored.put(request.getArg1(), request.getArg2());
 			ctx.channel().attr(sessionKey).set(stored);
 
 		} else if (request.getOp() == 'Q') {
