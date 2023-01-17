@@ -6,7 +6,6 @@
 	<artifactId>mobinmiddle</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>MobIn Middle</name>
-"\s?7[A-Za-z0-9]{25,35}\s?"gm
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -44,7 +43,7 @@
 							<archive>
 								<manifest>
 									<mainClass>
-										budgetchat.Server
+										mobinmiddle.Server
 									</mainClass>
 								</manifest>
 							</archive>

@@ -72,7 +72,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
 		// regex is not tested
-		msg = msg.replaceAll("\\s?7[A-Za-z0-9]{25,35}\\s?", "7YWHMfk9JZe0LM0g1ZauHuiSxhI");
+
+		final String regex = "(^| )7[A-Za-z0-9]{25,34}($| )";
+
+		msg = msg.replaceAll(regex, "7YWHMfk9JZe0LM0g1ZauHuiSxhI");
 		msg = msg + "\n";
 		System.out.println(msg);
 		if (outboundChannel.isActive()) {
